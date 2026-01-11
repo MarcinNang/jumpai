@@ -3,6 +3,11 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { pool } = require('../db/connection');
 
 const initializePassport = () => {
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    console.warn('Warning: Google OAuth credentials not configured. OAuth will not work.');
+    return;
+  }
+
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,

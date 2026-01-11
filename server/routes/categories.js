@@ -3,14 +3,28 @@ const router = express.Router();
 const { ensureAuthenticated } = require('../middleware/auth');
 const { pool } = require('../db/connection');
 
-// Get all categories for the authenticated user
+// Get all categories for the authenticated user with email counts
 router.get('/', ensureAuthenticated, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT * FROM categories WHERE user_id = $1 ORDER BY created_at DESC',
+      `SELECT 
+        c.*,
+        COUNT(e.id) FILTER (WHERE e.is_deleted = false) as email_count
+      FROM categories c
+      LEFT JOIN emails e ON c.id = e.category_id AND e.user_id = c.user_id
+      WHERE c.user_id = $1
+      GROUP BY c.id
+      ORDER BY c.created_at DESC`,
       [req.user.id]
     );
-    res.json(result.rows);
+    
+    // Convert email_count from string to number
+    const categories = result.rows.map(category => ({
+      ...category,
+      email_count: parseInt(category.email_count) || 0
+    }));
+    
+    res.json(categories);
   } catch (error) {
     console.error('Error fetching categories:', error);
     res.status(500).json({ error: 'Failed to fetch categories' });

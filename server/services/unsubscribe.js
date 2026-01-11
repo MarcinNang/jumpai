@@ -96,7 +96,7 @@ Only include actions that are necessary. If it's a simple one-click unsubscribe,
               }
               break;
             case 'fill':
-              await page.fill(action.selector, action.value);
+              await page.type(action.selector, action.value, { delay: 0 });
               break;
             case 'select':
               await page.select(action.selector, action.value);

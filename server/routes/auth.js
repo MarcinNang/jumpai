@@ -4,8 +4,33 @@ const router = express.Router();
 const { ensureAuthenticated } = require('../middleware/auth');
 const { pool } = require('../db/connection');
 
+// OAuth configuration check endpoint
+router.get('/check', (req, res) => {
+  const hasClientId = !!process.env.GOOGLE_CLIENT_ID;
+  const hasClientSecret = !!process.env.GOOGLE_CLIENT_SECRET;
+  const hasRedirectUri = !!process.env.GOOGLE_REDIRECT_URI;
+  
+  res.json({
+    configured: hasClientId && hasClientSecret,
+    hasClientId,
+    hasClientSecret,
+    hasRedirectUri,
+    redirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/auth/google/callback',
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000'
+  });
+});
+
 // Google OAuth routes
-router.get('/google',
+router.get('/google', (req, res, next) => {
+  // Check if Google OAuth credentials are configured
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    console.error('Missing Google OAuth credentials. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env file');
+    return res.status(500).json({ 
+      error: 'OAuth not configured', 
+      message: 'Please configure Google OAuth credentials in the server .env file' 
+    });
+  }
+  
   passport.authenticate('google', {
     scope: [
       'profile',
@@ -13,8 +38,8 @@ router.get('/google',
       'https://www.googleapis.com/auth/gmail.readonly',
       'https://www.googleapis.com/auth/gmail.modify'
     ]
-  })
-);
+  })(req, res, next);
+});
 
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
