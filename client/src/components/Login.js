@@ -6,7 +6,7 @@ const Login = ({ onLogin }) => {
   const handleGoogleLogin = () => {
     // Use full backend URL since window.location.href doesn't use the React proxy
     // The proxy only works for axios/fetch requests, not full page navigations
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    const apiUrl = process.env.REACT_APP_API_URL || (window.location.origin.includes('localhost') ? 'http://localhost:5000' : window.location.origin);
     window.location.href = `${apiUrl}/auth/google`;
   };
 
