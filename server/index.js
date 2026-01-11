@@ -31,11 +31,13 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
   resave: false,
   saveUninitialized: false,
+  name: 'sessionId', // Custom session name
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax' // Works for same-domain and OAuth redirects
+    sameSite: 'lax', // Works for same-domain (frontend and backend on same domain)
+    path: '/' // Ensure cookie is available for all paths
   }
 }));
 
