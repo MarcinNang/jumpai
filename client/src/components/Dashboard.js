@@ -98,7 +98,8 @@ const Dashboard = ({ user, onLogout }) => {
 
   const handleConnectAccount = () => {
     // Use full backend URL since window.location.href doesn't use the React proxy
-    window.location.href = 'http://localhost:5000/api/accounts/connect';
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    window.location.href = `${apiUrl}/api/accounts/connect`;
   };
 
   const handleFetchEmails = async () => {
