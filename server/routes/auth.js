@@ -10,13 +10,20 @@ router.get('/check', (req, res) => {
   const hasClientSecret = !!process.env.GOOGLE_CLIENT_SECRET;
   const hasRedirectUri = !!process.env.GOOGLE_REDIRECT_URI;
   
+  // Get the actual redirect URI being used (from passport config)
+  const actualRedirectUri = process.env.GOOGLE_REDIRECT_URI || '/auth/google/callback';
+  
   res.json({
     configured: hasClientId && hasClientSecret,
     hasClientId,
     hasClientSecret,
     hasRedirectUri,
-    redirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/auth/google/callback',
-    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000'
+    redirectUri: actualRedirectUri,
+    redirectUriFull: actualRedirectUri.startsWith('http') 
+      ? actualRedirectUri 
+      : `${req.protocol}://${req.get('host')}${actualRedirectUri}`,
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+    note: 'The redirectUriFull shows what Google will receive. It must match exactly in Google Cloud Console.'
   });
 });
 
@@ -79,7 +86,15 @@ router.get('/google/callback',
         );
       }
 
-      res.redirect(process.env.FRONTEND_URL || 'http://localhost:3000');
+      // Save session before redirect
+      req.session.save((err) => {
+        if (err) {
+          console.error('Error saving session:', err);
+          return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?error=1`);
+        }
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        res.redirect(frontendUrl);
+      });
     } catch (error) {
       console.error('Error in OAuth callback:', error);
       res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?error=1`);
