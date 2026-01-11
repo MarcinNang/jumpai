@@ -97,13 +97,22 @@ router.get('/google/callback',
           return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?error=1`);
         }
         
+        console.log('User logged in, session ID:', req.sessionID);
+        console.log('Session after login:', JSON.stringify(req.session, null, 2));
+        
         // Save session before redirect
         req.session.save((err) => {
           if (err) {
             console.error('Error saving session:', err);
             return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?error=1`);
           }
-          console.log('Session saved, redirecting to:', process.env.FRONTEND_URL || 'http://localhost:3000');
+          
+          console.log('=== OAuth Callback Success ===');
+          console.log('Session saved successfully');
+          console.log('Session ID:', req.sessionID);
+          console.log('Is authenticated:', req.isAuthenticated());
+          console.log('Redirecting to:', process.env.FRONTEND_URL || 'http://localhost:3000');
+          
           const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
           res.redirect(frontendUrl);
         });
@@ -117,9 +126,12 @@ router.get('/google/callback',
 
 router.get('/me', (req, res) => {
   // Debug session
+  console.log('=== /auth/me Request ===');
   console.log('Session ID:', req.sessionID);
+  console.log('Session:', JSON.stringify(req.session, null, 2));
   console.log('Is authenticated:', req.isAuthenticated());
   console.log('User:', req.user);
+  console.log('Cookies:', req.headers.cookie);
   
   if (req.isAuthenticated()) {
     return res.json({
@@ -130,7 +142,14 @@ router.get('/me', (req, res) => {
     });
   }
   
-  res.status(401).json({ error: 'Unauthorized' });
+  res.status(401).json({ 
+    error: 'Unauthorized',
+    debug: {
+      sessionID: req.sessionID,
+      hasSession: !!req.session,
+      isAuthenticated: req.isAuthenticated()
+    }
+  });
 });
 
 router.get('/logout', (req, res) => {
