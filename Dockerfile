@@ -1,9 +1,11 @@
+# =====================
 # Build stage
+# =====================
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files first (better caching)
 COPY package*.json ./
 COPY server/package*.json ./server/
 COPY client/package*.json ./client/
@@ -11,15 +13,19 @@ COPY client/package*.json ./client/
 # Install dependencies
 RUN npm install
 RUN cd server && npm install
-RUN cd ../client && npm install
+RUN cd client && npm install
 
-# Copy source code
+# Copy full source
 COPY . .
 
 # Build client
-RUN cd client && npm run build
+WORKDIR /app/client
+RUN npm run build
 
+
+# =====================
 # Production stage
+# =====================
 FROM node:18-alpine
 
 WORKDIR /app
@@ -28,17 +34,17 @@ WORKDIR /app
 COPY package*.json ./
 COPY server/package*.json ./server/
 
-# Install production dependencies
-RUN npm install --production
-RUN cd server && npm install --production
+# Install production dependencies only
+RUN npm install --omit=dev
+WORKDIR /app/server
+RUN npm install --omit=dev
 
-# Copy built files
-COPY --from=builder /app/server ./server
-COPY --from=builder /app/client/build ./client/build
+# Copy built artifacts and server code
+COPY --from=builder /app/server /app/server
+COPY --from=builder /app/client/build /app/client/build
 
-# Expose port
+# Expose API port
 EXPOSE 5000
 
 # Start server
-WORKDIR /app/server
 CMD ["node", "index.js"]
