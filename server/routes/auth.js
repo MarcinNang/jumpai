@@ -52,6 +52,10 @@ router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   async (req, res) => {
     try {
+      console.log('OAuth callback - User authenticated:', req.user ? 'Yes' : 'No');
+      console.log('OAuth callback - Session ID:', req.sessionID);
+      console.log('OAuth callback - Is authenticated:', req.isAuthenticated());
+      
       // Store the primary account
       const user = req.user;
       const accountResult = await pool.query(
@@ -86,14 +90,23 @@ router.get('/google/callback',
         );
       }
 
-      // Save session before redirect
-      req.session.save((err) => {
+      // Ensure user is logged in
+      req.login(user, (err) => {
         if (err) {
-          console.error('Error saving session:', err);
+          console.error('Error logging in user:', err);
           return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?error=1`);
         }
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-        res.redirect(frontendUrl);
+        
+        // Save session before redirect
+        req.session.save((err) => {
+          if (err) {
+            console.error('Error saving session:', err);
+            return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?error=1`);
+          }
+          console.log('Session saved, redirecting to:', process.env.FRONTEND_URL || 'http://localhost:3000');
+          const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+          res.redirect(frontendUrl);
+        });
       });
     } catch (error) {
       console.error('Error in OAuth callback:', error);
@@ -102,13 +115,22 @@ router.get('/google/callback',
   }
 );
 
-router.get('/me', ensureAuthenticated, (req, res) => {
-  res.json({
-    id: req.user.id,
-    email: req.user.email,
-    name: req.user.name,
-    picture: req.user.picture
-  });
+router.get('/me', (req, res) => {
+  // Debug session
+  console.log('Session ID:', req.sessionID);
+  console.log('Is authenticated:', req.isAuthenticated());
+  console.log('User:', req.user);
+  
+  if (req.isAuthenticated()) {
+    return res.json({
+      id: req.user.id,
+      email: req.user.email,
+      name: req.user.name,
+      picture: req.user.picture
+    });
+  }
+  
+  res.status(401).json({ error: 'Unauthorized' });
 });
 
 router.get('/logout', (req, res) => {
