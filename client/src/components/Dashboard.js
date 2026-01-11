@@ -97,7 +97,8 @@ const Dashboard = ({ user, onLogout }) => {
   };
 
   const handleConnectAccount = () => {
-    window.location.href = '/api/accounts/connect';
+    // Use full backend URL since window.location.href doesn't use the React proxy
+    window.location.href = 'http://localhost:5000/api/accounts/connect';
   };
 
   const handleFetchEmails = async () => {
@@ -105,6 +106,8 @@ const Dashboard = ({ user, onLogout }) => {
     try {
       await axios.post('/api/emails/fetch');
       alert('Emails fetched and processed successfully!');
+      // Refresh categories to show updated email counts
+      fetchCategories();
     } catch (error) {
       console.error('Error fetching emails:', error);
       alert('Failed to fetch emails');
@@ -194,7 +197,15 @@ const Dashboard = ({ user, onLogout }) => {
                 <Grid item xs={12} sm={6} key={category.id}>
                   <Card>
                     <CardContent>
-                      <Typography variant="h6">{category.name}</Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                        <Typography variant="h6">{category.name}</Typography>
+                        <Chip 
+                          label={category.email_count || 0} 
+                          color="primary" 
+                          size="small"
+                          sx={{ ml: 1 }}
+                        />
+                      </Box>
                       <Typography variant="body2" color="text.secondary">
                         {category.description}
                       </Typography>
@@ -204,7 +215,7 @@ const Dashboard = ({ user, onLogout }) => {
                         size="small"
                         onClick={() => navigate(`/category/${category.id}`)}
                       >
-                        View Emails
+                        View Emails ({category.email_count || 0})
                       </Button>
                       <IconButton
                         size="small"

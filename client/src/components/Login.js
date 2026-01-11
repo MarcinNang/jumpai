@@ -4,7 +4,9 @@ import GoogleIcon from '@mui/icons-material/Google';
 
 const Login = ({ onLogin }) => {
   const handleGoogleLogin = () => {
-    window.location.href = '/auth/google';
+    // Use full backend URL since window.location.href doesn't use the React proxy
+    // The proxy only works for axios/fetch requests, not full page navigations
+    window.location.href = 'http://localhost:5000/auth/google';
   };
 
   return (
