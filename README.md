@@ -41,7 +41,7 @@ An AI-powered email sorting and management application that automatically catego
    ```
 
 3. Set up environment variables:
-   - Copy `server/.env.example` to `server/.env`
+   - **Server**: Copy `server/.env.example` to `server/.env`
    - Fill in all required values:
      - `DATABASE_URL`: PostgreSQL connection string
      - `GOOGLE_CLIENT_ID`: Google OAuth client ID
@@ -50,6 +50,9 @@ An AI-powered email sorting and management application that automatically catego
      - `SESSION_SECRET`: Random secret for sessions
      - `OPENAI_API_KEY`: OpenAI API key
      - `FRONTEND_URL`: Frontend URL (e.g., http://localhost:3000)
+   - **Client**: Create `client/.env` file (optional for local development):
+     - `REACT_APP_API_URL`: Backend API URL (e.g., http://localhost:5000)
+     - For production, set this to your deployed backend URL
 
 4. Set up Google OAuth:
    - Go to [Google Cloud Console](https://console.cloud.google.com/)

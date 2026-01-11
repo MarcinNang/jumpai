@@ -184,6 +184,12 @@ If using `render.yaml`, Render will auto-detect it. Otherwise, configure manuall
    FRONTEND_URL = https://your-app-name.onrender.com
    ```
    ⚠️ Replace `your-app-name` with your actual Render service name!
+   
+   ```
+   REACT_APP_API_URL = https://your-app-name.onrender.com
+   ```
+   ⚠️ This should be the same as your backend URL (same as FRONTEND_URL if using a single service)
+   ⚠️ Replace `your-app-name` with your actual Render service name!
 
 3. **Click "Save Changes"** after adding all variables
 
@@ -358,6 +364,7 @@ Copy-paste this checklist:
 ✅ SESSION_SECRET = <random string, 32+ characters>
 ✅ OPENAI_API_KEY = <from OpenAI>
 ✅ FRONTEND_URL = https://your-app-name.onrender.com
+✅ REACT_APP_API_URL = https://your-app-name.onrender.com
 ```
 
 ---
