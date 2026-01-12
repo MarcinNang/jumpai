@@ -26,6 +26,8 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.set('trust proxy', 1); // 🔴 REQUIRED on Render
+
 // Session configuration
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -36,7 +38,7 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax', // Works for same-domain (frontend and backend on same domain)
+    sameSite: 'none', // Works for same-domain (frontend and backend on same domain)
     path: '/' // Ensure cookie is available for all paths
   }
 }));
