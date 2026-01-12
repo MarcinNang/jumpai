@@ -19,7 +19,9 @@ const theme = createTheme({
 });
 
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = 'https://jumpai-j5k1.onrender.com';
+axios.defaults.baseURL = process.env.NODE_ENV === 'production'
+    ? 'https://jumpai-j5k1.onrender.com'
+    : 'http://localhost:5000';
 
 function App() {
   const [user, setUser] = useState(null);
