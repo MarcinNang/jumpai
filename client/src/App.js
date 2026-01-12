@@ -19,6 +19,7 @@ const theme = createTheme({
 });
 
 axios.defaults.withCredentials = true;
+axios.defaults.baseURL = 'https://jumpai-j5k1.onrender.com';
 
 function App() {
   const [user, setUser] = useState(null);
